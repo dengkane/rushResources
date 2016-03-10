@@ -12,9 +12,9 @@ The whole process would be:
 
 2. You start the resources reservation activity by calling an HTTP API.
 
-3. Your application will call an HTTP API to reserve some resources.
+3. Your application will call an HTTP API to reserve some resources, and the reserved quantity will not be available to other users in a limited time. Here this application allow high concurrent requests and will do the necessary work to ensure limited resources be allocated correctly.
 
-4. Your application will call an HTTP API to confirm your reservations, or the reservations will be cancelled if you don't confirm them.
+4. Your application will call an HTTP API to confirm your reservations, or the reservations will be cancelled if you don't confirm them. This application will clear expired reservations every several seconds.
 
 5. You can get the available quantity for a resource by calling an HTTP API, or get the available quantities for some resources by calling another HTTP API.
 
