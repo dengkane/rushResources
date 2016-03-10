@@ -2,7 +2,7 @@
 
 ## Introduction:
 
-The application is difficult to implement if there are many users access it and rush for some very limited resources concurrently. I have considered many related problems and got a good solution, and implemented it as a standard API service. There are many scenarios to use this application, such as selling limited number of goods during a short time period and many buyers would be interested in them, etc.
+The application would be difficult to implement if there are many users access it and rush for some very limited resources concurrently. I have considered many related issues and got a good solution, and implemented it as a standard API service. There are many scenarios to use this application, such as selling limited number of goods during a short time period and many buyers are interested in them, etc.
 
 This application is implemented as HTTP Restful APIs, and use Redis as the storage layer. It can be run standalone, and you use it via APIs.
 
