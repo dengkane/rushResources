@@ -63,6 +63,28 @@ end
 
 local res, err
 
+-- check if can do this operation
+local httpt = require "lua.lib.resty.http"
+local httpc = httpt.new()
+
+res, err = httpc:request_uri(config["get_rush_activity_status_api_url"] .. "?activityCode=" .. args.activityCode, {
+   method = "GET"
+})
+
+ngx.log(ngx.ERR, "called getRushActivityStatus, and return: ", res.body)
+
+local returnData = cjson.decode(res.body)
+
+if (returnData.errorCode == "00" and returnData.returnObject == "RUNNING") then
+else
+	returnResult["errorCode"] = "06"
+	returnResult["errorMessage"] = "The activity's status is not RUNNING."
+	ngx.say(cjson.encode(returnResult))
+	return
+end
+
+-- end of checking
+
 local reservations = {}
 local hasSuccessfulReservations = false
 
@@ -89,8 +111,6 @@ for i,value in ipairs(jsonObject) do
 	end
 end
 
---if redisValue == ngx.null then
-
 -- if has valid reservations, add to the reservation list, ready for storing into a database
 if hasSuccessfulReservations then
 	local trackingId = uuid()
@@ -99,6 +119,8 @@ if hasSuccessfulReservations then
 	
 	local jsonReservations = cjson.encode(reservations)
 	
+	res, err = red:multi()
+
 	res, err = red:rpush(args.activityCode .. "_reservations", jsonReservations)
 	
 	res, err = red:set(args.activityCode .. "_reservation_" .. trackingId, jsonReservations)
@@ -106,8 +128,10 @@ if hasSuccessfulReservations then
 	-- expire after x seconds
 	res, err = red:expire(args.activityCode .. "_reservation_" .. trackingId, config["reservation_expire_seconds"])
 	
+	res, err = red:exec()
+
 	returnResult["errorCode"] = "00"
-	returnResult["returnObject"] = {trackingId = trackingId, reservations = reservations}
+	returnResult["returnObject"] = reservations
 else
 	returnResult["errorCode"] = "05"
 	returnResult["errorMessage"] = "can't reserve any resource."

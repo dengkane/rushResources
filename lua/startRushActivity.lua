@@ -10,7 +10,7 @@ local function clearExpiredReservations(premature, activityCode)
 	
 	ngx.log(ngx.ERR, "Running the job once ", activityCode)
 	
-   local httpt = require "resty.http"
+   local httpt = require "lua.lib.resty.http"
    local httpc = httpt.new()
    
    local res, err = httpc:request_uri(config["clear_expired_reservations_api_url"] .. "?activityCode=" .. activityCode, {
