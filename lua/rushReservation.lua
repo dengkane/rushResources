@@ -119,7 +119,7 @@ if hasSuccessfulReservations then
 	
 	local jsonReservations = cjson.encode(reservations)
 	
-	res, err = red:multi()
+	res, err = red:init_pipeline()
 
 	res, err = red:rpush(args.activityCode .. "_reservations", jsonReservations)
 	
@@ -128,7 +128,7 @@ if hasSuccessfulReservations then
 	-- expire after x seconds
 	res, err = red:expire(args.activityCode .. "_reservation_" .. trackingId, config["reservation_expire_seconds"])
 	
-	res, err = red:exec()
+	res, err = red:commit_pipeline()
 
 	returnResult["errorCode"] = "00"
 	returnResult["returnObject"] = reservations
