@@ -1,22 +1,11 @@
+local utils = { }
 
-local _M = {
-    _VERSION = '0.06',
-}
-
-local mt = { __index = _M }
-
-
-function _M.new(self)
-    return setmetatable({ }, mt)
-end
-
-
-function _M.eval(self, expr)
+function utils.eval(self, expr)
    local f = load('return ' .. expr)
    return f()
 end
 
-function _M.getReturnResult(self, errorCode, errorMessage, returnObject)
+function utils.getReturnResult(self, errorCode, errorMessage, returnObject)
 	local returnResult = { errorCode = errorCode }
 	if errorMessage then
 		returnResult["errorMessage"] = errorMessage
@@ -29,7 +18,7 @@ function _M.getReturnResult(self, errorCode, errorMessage, returnObject)
 	return returnResult
 end
 
-function _M.handleRedisReturns(self, res, err, errorCode)
+function utils.handleRedisReturns(self, res, err, errorCode)
 	local returnResult
 
    if not res then
@@ -43,5 +32,5 @@ function _M.handleRedisReturns(self, res, err, errorCode)
 	return returnResult
 end
 
-return _M
+return utils
 

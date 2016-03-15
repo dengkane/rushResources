@@ -1,5 +1,5 @@
 local redis = require "resty.redis"
-local utils = (require "lua.lib.utils"):new()
+local utils = require "lua.lib.utils"
 
 local red = redis:new()
 
@@ -9,13 +9,13 @@ local uuid = require("lua.lib.resty.uuid")
 
 red:set_timeout(1000) -- 1 sec
 
+local cjson = require "cjson.safe"
+
 local ok, err = red:connect(config["redis_host"], config["redis_port"])
 if not ok then
-   ngx.say(cjson.encode(utils:getReturnResult("01","Failed to connect: " .. err )))
+   ngx.say(cjson.encode(utils.getReturnResult("01","Failed to connect: " .. err )))
    return
 end
-
-local cjson = require "cjson.safe"
 
 local args
 
@@ -29,19 +29,19 @@ end
 -- parameter checking
 
 if not args.activityCode then
-	ngx.say(cjson.encode(utils:getReturnResult("02","No activityCode parameter.")))
+	ngx.say(cjson.encode(utils.getReturnResult("02","No activityCode parameter.")))
    return
 end
 
 if not args.reservationData then
-   ngx.say(cjson.encode(utils:getReturnResult("03","No reservationData parameter.")))
+   ngx.say(cjson.encode(utils.getReturnResult("03","No reservationData parameter.")))
    return
 end
 
 local jsonObject = cjson.decode(args.reservationData)
 
 if not jsonObject then
-   ngx.say(cjson.encode(utils:getReturnResult("04","Parameter reservationData is not valid JSON format.")))
+   ngx.say(cjson.encode(utils.getReturnResult("04","Parameter reservationData is not valid JSON format.")))
    return
 end
 
@@ -63,7 +63,7 @@ local returnData = cjson.decode(res.body)
 
 if (returnData.errorCode == "00" and returnData.returnObject == "RUNNING") then
 else
-	ngx.say(cjson.encode(utils:getReturnResult("06","The activity's status is not RUNNING.")))
+	ngx.say(cjson.encode(utils.getReturnResult("06","The activity's status is not RUNNING.")))
 	return
 end
 
@@ -75,7 +75,7 @@ local hasSuccessfulReservations = false
 for i,value in ipairs(jsonObject) do
 	res, err = red:get(args.activityCode .. "_resource_" .. value.resourceCode)
 	
-	local redisReturn = utils:handleRedisReturns(res, err, "04")
+	local redisReturn = utils.handleRedisReturns(res, err, "04")
 	
 	if redisReturn then
 		ngx.say(cjson.encode(redisReturn))
@@ -110,16 +110,16 @@ if hasSuccessfulReservations then
 	
 	res, err = red:commit_pipeline()
 
-	ngx.say(cjson.encode(utils:getReturnResult("00", nil, reservations)))
+	ngx.say(cjson.encode(utils.getReturnResult("00", nil, reservations)))
 else
-	ngx.say(cjson.encode(utils:getReturnResult("05", "Can't reserve any resource.")))
+	ngx.say(cjson.encode(utils.getReturnResult("05", "Can't reserve any resource.")))
 end
 
 -- put it into the connection pool of size 100,
 -- with 10 seconds max idle time
 local ok, err = red:set_keepalive(10000, 100)
 if not ok then
-	ngx.say(cjson.encode(utils:getReturnResult("06","Failed to set keepalive: " .. err)))
+	ngx.say(cjson.encode(utils.getReturnResult("06","Failed to set keepalive: " .. err)))
    return
 end
 

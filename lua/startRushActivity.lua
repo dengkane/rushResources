@@ -1,9 +1,11 @@
 local redis = require "resty.redis"
-local utils = (require "lua.lib.utils"):new()
+local utils = require "lua.lib.utils"
 
 local red = redis:new()
 
 local config = require("lua.appConfig")
+
+local cjson = require "cjson.safe"
 
 local function clearExpiredReservations(premature, activityCode)
 	if premature then
@@ -40,11 +42,9 @@ red:set_timeout(1000) -- 1 sec
 
 local ok, err = red:connect(config["redis_host"], config["redis_port"])
 if not ok then
-   ngx.say(cjson.encode(utils:getReturnResult("01","Failed to connect: " .. err )))
+   ngx.say(cjson.encode(utils.getReturnResult("01","Failed to connect: " .. err )))
    return
 end
-
-local cjson = require "cjson.safe"
 
 local args
 
@@ -58,7 +58,7 @@ end
 -- parameter checking
 
 if not args.activityCode then
-	ngx.say(cjson.encode(utils:getReturnResult("02","No activityCode parameter.")))
+	ngx.say(cjson.encode(utils.getReturnResult("02","No activityCode parameter.")))
    return
 end
 
@@ -73,7 +73,7 @@ if res == ngx.null then
 	res, err = red:set(args.activityCode .. "_running_status", "RUNNING")
 else
 	if res == "RUNNING" then
-		ngx.say(cjson.encode(utils:getReturnResult("03","The checking job has already been started.")))
+		ngx.say(cjson.encode(utils.getReturnResult("03","The checking job has already been started.")))
 		return
 	else
 		local ok, err = ngx.timer.at(config["reservation_checking_frequency_seconds"], clearExpiredReservations, args.activityCode)
@@ -81,13 +81,13 @@ else
 	end
 end
 
-ngx.say(cjson.encode(utils:getReturnResult("00")))
+ngx.say(cjson.encode(utils.getReturnResult("00")))
 
 -- put it into the connection pool of size 100,
 -- with 10 seconds max idle time
 local ok, err = red:set_keepalive(10000, 100)
 if not ok then
-	ngx.say(cjson.encode(utils:getReturnResult("06","Failed to set keepalive: " .. err)))
+	ngx.say(cjson.encode(utils.getReturnResult("06","Failed to set keepalive: " .. err)))
    return
 end
 
