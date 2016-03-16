@@ -1,9 +1,9 @@
 local redis = require "resty.redis"
-local utils = require "lua.lib.utils"
+local utils = require "lib.utils"
 
 local red = redis:new()
 
-local config = require("lua.appConfig")
+local config = require("appConfig")
 
 local cjson = require "cjson.safe"
 
@@ -14,7 +14,7 @@ local function clearExpiredReservations(premature, activityCode)
 	
 	ngx.log(ngx.ERR, "Running the job once ", activityCode)
 	
-   local httpt = require "lua.lib.resty.http"
+   local httpt = require "lib.resty.http"
    local httpc = httpt.new()
    
    local res, err = httpc:request_uri(config["clear_expired_reservations_api_url"] .. "?activityCode=" .. activityCode, {

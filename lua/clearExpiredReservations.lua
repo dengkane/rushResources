@@ -1,9 +1,9 @@
 local redis = require "resty.redis"
-local utils = require "lua.lib.utils"
+local utils = require "lib.utils"
 
 local red = redis:new()
 
-local config = require("lua.appConfig")
+local config = require("appConfig")
 
 red:set_timeout(1000) -- 1 sec
 
@@ -36,8 +36,6 @@ end
 local res, err
 
 res, err = red:lrange(args.activityCode .. "_reservations", 0, -1)
-
-ngx.say("res=" .. tostring(res))
 
 if res == ngx.null then
 	ngx.say(cjson.encode(utils.getReturnResult("03","Can't find reservations.")))

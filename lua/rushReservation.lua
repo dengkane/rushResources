@@ -1,11 +1,11 @@
 local redis = require "resty.redis"
-local utils = require "lua.lib.utils"
+local utils = require "lib.utils"
 
 local red = redis:new()
 
-local config = require("lua.appConfig")
+local config = require("appConfig")
 
-local uuid = require("lua.lib.resty.uuid")
+local uuid = require("lib.resty.uuid")
 
 red:set_timeout(1000) -- 1 sec
 
