@@ -23,13 +23,23 @@ function utils.handleRedisReturns(res, err, errorCode)
 
    if not res then
       if not err then
-         returnResult = self:getReturnResult(errorCode,"Some errors occured when operating Redis!")
+         returnResult = utils.getReturnResult(errorCode,"Some errors occured when operating Redis!")
       else
-         returnResult = self:getReturnResult(errorCode,"Some errors occured when operating Redis : " .. err)
+         returnResult = utils.getReturnResult(errorCode,"Some errors occured when operating Redis : " .. err)
       end
       return
    end
 	return returnResult
+end
+
+function utils.decodeURI(s)
+   s = string.gsub(s, '%%(%x%x)', function(h) return string.char(tonumber(h, 16)) end)
+   return s
+end
+
+function utils.encodeURI(s)
+   s = string.gsub(s, "([^%w%.%- ])", function(c) return string.format("%%%02X", string.byte(c)) end)
+   return string.gsub(s, " ", "+")
 end
 
 return utils
