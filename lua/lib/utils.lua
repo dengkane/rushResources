@@ -42,5 +42,10 @@ function utils.encodeURI(s)
    return string.gsub(s, " ", "+")
 end
 
+function utils.loadstring(functionScript)
+   local f, err = loadstring("return function (arg) " .. functionScript .. " end", functionScript)
+   if f then return f() else return f, err end
+end
+
 return utils
 
